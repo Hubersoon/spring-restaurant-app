@@ -15,7 +15,6 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
-@Data
 public class Restaurant {
 
     @Column(name = "name")

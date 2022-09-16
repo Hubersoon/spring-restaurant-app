@@ -17,7 +17,6 @@ import java.util.UUID;
 import static com.example.restaurantapp.controller.mapper.Mapper.map;
 import static com.example.restaurantapp.controller.mapper.Mapper.mapListMealsToDto;
 
-@RestController
 @RequestMapping("api")
 public class RestaurantController {
 
