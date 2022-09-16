@@ -7,80 +7,91 @@ import com.example.restaurantapp.model.Meal;
 import com.example.restaurantapp.model.Restaurant;
 import com.example.restaurantapp.model.RestaurantType;
 import com.example.restaurantapp.reposiotry.RestaurantRepository;
-import lombok.Builder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
 
-    public RestaurantService() {
-        this.restaurantRepository = new RestaurantRepository();
-        restaurantRepository.restaurantList.add(new Restaurant("Kebab","Warszawa", RestaurantType.TURKISH));
-        restaurantRepository.restaurantList.add(new Restaurant("Pizza","Krakow", RestaurantType.ITALIAN));
-        restaurantRepository.restaurantList.add(new Restaurant("Burger's","Kielce", RestaurantType.AMERICAN));
 
+    public RestaurantService(RestaurantRepository restaurantRepository) {
+        this.restaurantRepository = restaurantRepository;
     }
+
 
     public boolean addRestaurant(Restaurant restaurant) {
-        Restaurant newRestaurant = restaurant;
-      return restaurantRepository.restaurantList.add(newRestaurant);
+        if (restaurant == null) {
+            return false;
+        } else {
+            return restaurantRepository.addRestaurant(restaurant);
+        }
     }
 
-    public List<Restaurant> printAllRestaurant() {
-        return restaurantRepository.restaurantList;
+    public List<Restaurant> getAllRestaurant() {
+        return restaurantRepository.getRestaurantList();
     }
 
-    public boolean addMeal(Meal meal, UUID id) {
-        final var restaurant = findRestaurant(id);
+    public boolean addMeal(Meal meal, UUID restaurantId) {
+        if (meal == null) {
+            return false;
+        }
+        final var restaurant = findRestaurant(restaurantId);
         return restaurant.addMeal(meal);
     }
 
-    public Map<Restaurant, List<Meal>> printAllMealsForAllRestaurant() {
-        Map<Restaurant,List<Meal>> allMeals = new HashMap<>();
-        restaurantRepository.restaurantList.stream()
-                .forEach(restaurant -> allMeals.put(restaurant,restaurant.mealsList));
-        return allMeals;
-    }
-
-    public List<Meal> printMealsForSpecificRestaurant(UUID id) {
+    public List<Meal> getRestaurantMeals(UUID id) {
         final var restaurant = findRestaurant(id);
         return restaurant.getMealsList();
     }
 
     public boolean deleteRestaurant(UUID id) {
         final var restaurant = findRestaurant(id);
-       return restaurantRepository.restaurantList.remove(restaurant);
+        return restaurantRepository.deleteRestaurant(restaurant);
+    }
+
+    public Restaurant changeRestaurantName(String name, UUID id) {
+        final var restaurant = findRestaurant(id);
+        restaurantRepository.deleteRestaurant(restaurant);
+        final var newRestaurant = restaurant.updateName(name);
+        restaurantRepository.addRestaurant(newRestaurant);
+        return newRestaurant;
+    }
+
+    public Restaurant changeRestaurantAddress(String address, UUID id) {
+        final var restaurant = findRestaurant(id);
+        restaurantRepository.restaurantList.remove(restaurant);
+        final var newRestaurant = restaurant.updateAddress(address);
+        restaurantRepository.restaurantList.add(newRestaurant);
+        return newRestaurant;
+    }
+
+    public Restaurant changeRestaurantType(RestaurantType type, UUID id) {
+        final var restaurant = findRestaurant(id);
+        restaurantRepository.restaurantList.remove(restaurant);
+        final var newRestaurant = restaurant.updateRestaurantType(type);
+        restaurantRepository.restaurantList.add(newRestaurant);
+        return newRestaurant;
+    }
+
+    public boolean deleteMeal(UUID restaurantId, UUID mealId) {
+        final var restaurant = findRestaurant(restaurantId);
+        final var mealsList = restaurant.getMealsList();
+        final var meal = mealsList.stream()
+                .filter(m -> m.getId().equals(mealId))
+                .findAny()
+                .orElseThrow(() -> new NotFoundMealException("Meal doesn't exist"));
+        return mealsList.remove(meal);
     }
 
     private Restaurant findRestaurant(UUID id) {
-       return restaurantRepository.restaurantList.stream()
+        return restaurantRepository.getRestaurantList().stream()
                 .filter(restaurant -> restaurant.getId().equals(id))
                 .findAny()
-                .orElseThrow(NotFoundResturantException::new);
+                .orElseThrow(() -> new NotFoundResturantException("Restaurant doesn't exist in the app"));
     }
 
-    public void changeRestaurantName(String name, UUID id) {
-        final var restaurant = findRestaurant(id);
-        restaurantRepository.restaurantList.remove(restaurant);
-        final var newRestaurant = restaurant.updateName(name);
-        restaurantRepository.restaurantList.add(newRestaurant);
-    }
-
-    public boolean deleteMeal(UUID idR, UUID idM) {
-        final var restaurant = findRestaurant(idR);
-        final var mealsList = restaurant.getMealsList();
-        final var meal = mealsList.stream()
-                .filter(m -> m.getId().equals(idM))
-                .findAny()
-                .orElseThrow(NotFoundMealException::new);
-       return mealsList.remove(meal);
-    }
 }

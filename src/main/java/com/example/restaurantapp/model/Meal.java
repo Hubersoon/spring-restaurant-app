@@ -1,8 +1,10 @@
 package com.example.restaurantapp.model;
 
-import java.math.BigDecimal;
+import lombok.Data;
+
 import java.util.UUID;
 
+@Data
 public class Meal {
 
     public final UUID id;
@@ -19,11 +21,8 @@ public class Meal {
         return id;
     }
 
-    @Override
-    public String toString() {
-        return "Meal ID: " + id +
-                ", name: " + name +
-                ", price: " + price
-                ;
-    }
+
+
+
+
 }
