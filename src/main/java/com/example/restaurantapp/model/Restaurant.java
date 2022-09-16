@@ -10,16 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
-@Table(name = "restaurants")
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
+@Data
 public class Restaurant {
 
-    @Column(name = "name")
+//    @Column(name = "name")
     public final String name;
-    @Column(name = "address")
+//    @Column(name = "address")
     public final String address;
 //    @Column(name = "type")
     public final RestaurantType type;
