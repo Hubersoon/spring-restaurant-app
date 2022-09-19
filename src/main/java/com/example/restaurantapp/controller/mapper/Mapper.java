@@ -33,10 +33,10 @@ public class Mapper {
         validateDto(restaurant);
         return RestaurantDto.builder()
                 .name(restaurant.getName())
-                .address(restaurant.address)
+                .address(restaurant.getAddress())
                 .type(restaurant.getType())
                 .id(restaurant.getId())
-                .mealsList(restaurant.getMealsList())
+//                .mealsList(restaurant.getMealsList())
                 .build();
     }
 

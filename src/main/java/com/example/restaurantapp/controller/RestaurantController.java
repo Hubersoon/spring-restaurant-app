@@ -1,22 +1,22 @@
 package com.example.restaurantapp.controller;
 
 
-import com.example.restaurantapp.controller.mapper.Mapper;
-import com.example.restaurantapp.model.RestaurantType;
+import com.example.restaurantapp.model.Meal;
+import com.example.restaurantapp.model.Restaurant;
+import com.example.restaurantapp.model.UpdateRestaurantRequest;
 import com.example.restaurantapp.model.dto.CreateMealDto;
 import com.example.restaurantapp.model.dto.CreateRestaurantDto;
-import com.example.restaurantapp.model.dto.MealDto;
-import com.example.restaurantapp.model.dto.RestaurantDto;
 import com.example.restaurantapp.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
-import static com.example.restaurantapp.controller.mapper.Mapper.map;
-import static com.example.restaurantapp.controller.mapper.Mapper.mapListMealsToDto;
-
+@Controller
 @RequestMapping("api")
 public class RestaurantController {
 
@@ -27,50 +27,66 @@ public class RestaurantController {
         this.restaurantService = restaurantService;
     }
 
-    @PostMapping("restaurants")
-    public boolean addRestaurant(@RequestBody CreateRestaurantDto restaurant) {
-        return restaurantService.addRestaurant(Mapper.map(restaurant));
-    }
-
     @GetMapping("restaurants")
-    public List<RestaurantDto> printAllRestaurant() {
-        return Mapper.map(restaurantService.getAllRestaurant());
+    public ResponseEntity<List<Restaurant>> getAllRestaurant() {
+        return restaurantService.getAllRestaurant();
     }
 
-    @PostMapping("restaurants/{id}/meals")
-    public boolean addMeal(@RequestBody CreateMealDto mealDto, @PathVariable("id") UUID id) {
-        return restaurantService.addMeal(map(mealDto), id);
+    @GetMapping("restaurants/{id}")
+    public ResponseEntity<Restaurant> getSpecificRestaurant(@PathVariable("id") UUID id) {
+        return restaurantService.getSpecificRestaurant(id);
     }
 
     @GetMapping("restaurants/{id}/meals")
-    public List<MealDto> printMealsForSpecificRestaurant(@PathVariable("id") UUID id) {
-        return mapListMealsToDto(restaurantService.getRestaurantMeals(id));
+    public ResponseEntity<List<Meal>> getMealsForSpecificRestaurant(@PathVariable("id") UUID restaurantId) {
+        return restaurantService.getMealsFromSpecificRestaurant(restaurantId);
     }
 
-    @DeleteMapping("/restaurants/{id}")
-    public boolean deleteRestaurant(@PathVariable("id") UUID id) {
-        return restaurantService.deleteRestaurant(id);
+    @GetMapping("restaurants/meals")
+    public ResponseEntity<List<Meal>> getMeals() {
+        return restaurantService.getMeals();
+    }
+
+    @PostMapping("restaurants")
+    public ResponseEntity<Restaurant> addRestaurant(@RequestBody CreateRestaurantDto restaurant) {
+        return restaurantService.addRestaurant(restaurant);
+    }
+
+    @PostMapping("restaurants/{id}/meals")
+    public ResponseEntity<Meal> addMeal(@PathVariable("id") UUID restaurantId,
+                                        @RequestBody CreateMealDto createMealDto) {
+
+        return restaurantService.addMeal(restaurantId, createMealDto);
     }
 
     @PatchMapping("restaurants/{id}")
-    public void changeRestaurantData(@RequestParam(required = false) String name,
-                                     @RequestParam(required = false) String address,
-                                     @RequestParam(required = false) RestaurantType type,
-                                     @PathVariable("id") UUID id) {
-        if (name != null) {
-            restaurantService.changeRestaurantName(name, id);
-        }
-        if (address != null) {
-            restaurantService.changeRestaurantAddress(address, id);
-        }
-        if (type != null) {
-            restaurantService.changeRestaurantType(type, id);
-        }
+    public ResponseEntity<Restaurant> updateRestaurant(@RequestBody UpdateRestaurantRequest updateRestaurantRequest,
+                                                       @PathVariable("id") UUID restaurantId) {
+        return restaurantService.updateRestaurant(restaurantId, updateRestaurantRequest);
     }
 
-    @DeleteMapping("/restaurants/{restaurantId}/meals/{mealId}")
-    public boolean deleteMeal(@PathVariable UUID restaurantId, @PathVariable UUID mealId) {
-        return restaurantService.deleteMeal(restaurantId, mealId);
+    @DeleteMapping("restaurants")
+    public ResponseEntity<HttpStatus> deleteAllRestaurants() {
+        return restaurantService.deleteAllRestaurants();
+    }
+
+    @DeleteMapping("restaurants/{id}")
+    public ResponseEntity<HttpStatus> deleteRestaurant(@PathVariable("id") UUID restaurantId) {
+        return restaurantService.deleteRestaurant(restaurantId);
+    }
+
+    @DeleteMapping("/restaurants/{restaurantId}/meals/")
+    public ResponseEntity<HttpStatus> deleteMealsFromSpecificRestaurant(@PathVariable("restaurantId") UUID restaurantId) {
+        return restaurantService.deleteMealsFromSpecificRestaurant(restaurantId);
+    }
+
+    @DeleteMapping("/restaurants/meals/{mealId}")
+    public ResponseEntity<HttpStatus> deleteMeal(@PathVariable("mealId") UUID mealId) {
+        return restaurantService.deleteMeal(mealId);
+    }
+    @DeleteMapping
+    public ResponseEntity<HttpStatus> deleteMeals() {
+        return restaurantService.deleteMeals();
     }
 
 }
