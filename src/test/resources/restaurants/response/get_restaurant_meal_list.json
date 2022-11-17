@@ -1,0 +1,14 @@
+[
+  {
+    "restaurantName": "Sushi Osaka",
+    "id": "81391b4e-3242-11eb-adc1-0242ac120002",
+    "name": "Sushi nigiri set",
+    "price": 42.0
+  },
+  {
+    "restaurantName": "Sushi Osaka",
+    "id": "81391b4e-3172-11eb-adc1-0242ac120002",
+    "name": "Fried shrimp",
+    "price": 24.0
+  }
+]

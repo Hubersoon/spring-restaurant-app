@@ -14,10 +14,10 @@ import java.util.UUID;
 @Builder
 public class RestaurantDto {
 
+    private final UUID id;
     private final String name;
     private final String address;
     private final RestaurantType type;
-    private final UUID id;
-    private final List<Meal> mealsList;
+    private final List<MealDto> mealsList;
 
 }

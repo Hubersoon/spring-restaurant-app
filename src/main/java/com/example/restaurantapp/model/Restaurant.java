@@ -12,24 +12,19 @@ import java.util.UUID;
 @Table(name = "restaurants")
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor(force = true)
+@NoArgsConstructor
 @Data
-//@RequiredArgsConstructor
 public class Restaurant {
 
     @Id
     @GeneratedValue(generator = "UUID")
     private UUID id;
-    @Column(name = "name")
     private String name;
-    @Column(name = "address")
     private String address;
-    @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private RestaurantType type;
     @JsonIgnore
     @OneToMany(mappedBy = "restaurant",cascade=CascadeType.ALL)
-//    @OneToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL, mappedBy = "restaurant")
     private List<Meal> mealsList;
 
 
@@ -37,13 +32,32 @@ public class Restaurant {
         this.name = name;
         this.address = address;
         this.type = type;
-        this.id = UUID.randomUUID();
+//        this.id = UUID.randomUUID();
         this.mealsList = new ArrayList<>();
     }
 
-    public void addMeal(Meal meal) {
-        this.mealsList.add(meal);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Restaurant)) return false;
+
+        Restaurant that = (Restaurant) o;
+
+        if (!getName().equals(that.getName())) return false;
+        return getAddress().equals(that.getAddress());
     }
+
+    @Override
+    public int hashCode() {
+        int result = getName().hashCode();
+        result = 31 * result + getAddress().hashCode();
+        return result;
+    }
+
+    public void addMeal(Meal meal) {
+        mealsList.add(meal);
+    }
+
 }
 
 

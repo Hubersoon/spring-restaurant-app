@@ -1,0 +1,50 @@
+[
+  {
+    "restaurantName": "Gregory Burger",
+    "id": "8139164e-3172-11eb-adc1-0242ac120002",
+    "name": "Big Beef Burger",
+    "price": 31.0
+  },
+  {
+    "restaurantName": "Gregory Burger",
+    "id": "81391a72-3172-11eb-adc1-0242ac120002",
+    "name": "Chcicken Burger",
+    "price": 28.0
+  },
+  {
+    "restaurantName": "Pizza Italiana",
+    "id": "81391cd4-3172-11eb-adc1-0242ac120002",
+    "name": "Pizza Margherita",
+    "price": 39.0
+  },
+  {
+    "restaurantName": "Le French Food",
+    "id": "8139187e-3172-11eb-adc1-0242ac120002",
+    "name": "Snails with salt",
+    "price": 45.0
+  },
+  {
+    "restaurantName": "Kebab & Falafel",
+    "id": "81391ffe-3172-11eb-adc1-0242ac120002",
+    "name": "Lamb kebab",
+    "price": 28.0
+  },
+  {
+    "restaurantName": "Kebab & Falafel",
+    "id": "82391b4e-3172-11eb-adc1-0242ac120002",
+    "name": "Falafel",
+    "price": 24.0
+  },
+  {
+    "restaurantName": "Sushi Osaka",
+    "id": "81391b4e-3242-11eb-adc1-0242ac120002",
+    "name": "Sushi nigiri set",
+    "price": 42.0
+  },
+  {
+    "restaurantName": "Sushi Osaka",
+    "id": "81391b4e-3172-11eb-adc1-0242ac120002",
+    "name": "Fried shrimp",
+    "price": 24.0
+  }
+]

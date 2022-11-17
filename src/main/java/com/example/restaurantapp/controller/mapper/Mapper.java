@@ -1,5 +1,6 @@
 package com.example.restaurantapp.controller.mapper;
 
+import com.example.restaurantapp.exceptions.NullDtoException;
 import com.example.restaurantapp.model.dto.CreateMealDto;
 import com.example.restaurantapp.model.dto.CreateRestaurantDto;
 import com.example.restaurantapp.model.dto.MealDto;
@@ -13,17 +14,6 @@ import java.util.stream.Collectors;
 
 public class Mapper {
 
-    public static Meal map(CreateMealDto mealDto) {
-        validateDto(mealDto);
-        return new Meal(mealDto.getName(), mealDto.price);
-    }
-
-    private static void validateDto(Object o) {
-        if (o == null) {
-            throw new RuntimeException();
-        }
-    }
-
     public static Restaurant map(CreateRestaurantDto restaurantDTO) {
         validateDto(restaurantDTO);
         return new Restaurant(restaurantDTO.getName(), restaurantDTO.getAddress(), restaurantDTO.getType());
@@ -36,8 +26,13 @@ public class Mapper {
                 .address(restaurant.getAddress())
                 .type(restaurant.getType())
                 .id(restaurant.getId())
-//                .mealsList(restaurant.getMealsList())
+                .mealsList(mapListMealsToDto(restaurant.getMealsList()))
                 .build();
+    }
+
+    public static Meal map(CreateMealDto mealDto) {
+        validateDto(mealDto);
+        return new Meal(mealDto.getName(), mealDto.getPrice(),null);
     }
 
     public static MealDto map(Meal meal) {
@@ -46,6 +41,7 @@ public class Mapper {
                 .name(meal.getName())
                 .price(meal.price)
                 .id(meal.getId())
+                .restaurantName(meal.getRestaurant().getName())
                 .build();
     }
 
@@ -62,5 +58,11 @@ public class Mapper {
         return restaurantMeals.stream()
                 .map(Mapper::map)
                 .collect(Collectors.toList());
+    }
+
+    private static void validateDto(Object o) {
+        if (o == null) {
+            throw new NullDtoException("Input object cannot be null");
+        }
     }
 }

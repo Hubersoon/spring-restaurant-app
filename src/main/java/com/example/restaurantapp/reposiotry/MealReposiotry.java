@@ -5,5 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-public interface MealRepo extends JpaRepository<Meal, UUID> {
+public interface MealReposiotry extends JpaRepository<Meal, UUID> {
+
 }

@@ -3,6 +3,7 @@ package com.example.restaurantapp.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,5 +20,4 @@ public class UpdateRestaurantRequest {
     private Optional<String> address = empty();
     private Optional<RestaurantType> type = empty();
     private Optional<List<Meal>> mealList = empty();
-
 }

@@ -1,154 +1,131 @@
 package com.example.restaurantapp.service;
 
 
+import com.example.restaurantapp.controller.mapper.Mapper;
+import com.example.restaurantapp.exceptions.NotFoundMealException;
 import com.example.restaurantapp.exceptions.NotFoundResturantException;
 import com.example.restaurantapp.model.Meal;
 import com.example.restaurantapp.model.Restaurant;
 import com.example.restaurantapp.model.UpdateRestaurantRequest;
 import com.example.restaurantapp.model.dto.CreateMealDto;
 import com.example.restaurantapp.model.dto.CreateRestaurantDto;
-import com.example.restaurantapp.reposiotry.MealRepo;
-import com.example.restaurantapp.reposiotry.RestaurantRepo;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.example.restaurantapp.model.dto.MealDto;
+import com.example.restaurantapp.model.dto.RestaurantDto;
+import com.example.restaurantapp.reposiotry.MealReposiotry;
+import com.example.restaurantapp.reposiotry.RestaurantRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.example.restaurantapp.controller.mapper.Mapper.map;
 
 @Service
 public class RestaurantService {
 
-    private final RestaurantRepo restaurantRepo;
-    private final MealRepo mealRepo;
+    private final RestaurantRepository restaurantRepository;
+    private final MealReposiotry mealReposiotry;
 
-    public RestaurantService(RestaurantRepo restaurantRepository, MealRepo mealRepo) {
-        this.restaurantRepo = restaurantRepository;
-        this.mealRepo = mealRepo;
+    public RestaurantService(RestaurantRepository restaurantRepository, MealReposiotry mealReposiotry) {
+        this.restaurantRepository = restaurantRepository;
+        this.mealReposiotry = mealReposiotry;
     }
 
-
-    public ResponseEntity<List<Restaurant>> getAllRestaurant() {
-        try {
-            List<Restaurant> restaurantList = new ArrayList<>(restaurantRepo.findAll());
-            return new ResponseEntity<>(restaurantList, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
-        }
+    public List<RestaurantDto> getRestaurants() {
+        final var restaurantList = new ArrayList<RestaurantDto>();
+        restaurantRepository.findAll()
+                .forEach(restaurant -> restaurantList.add(map(restaurant)));
+        return restaurantList;
     }
 
-    public ResponseEntity<Restaurant> getSpecificRestaurant(UUID id) {
-        final var restaurant = findRestaurant(id);
-        try {
-            return new ResponseEntity<>(restaurant, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
-        }
+    public RestaurantDto getRestaurant(UUID id) {
+        return map(findRestaurant(id));
     }
 
-    public ResponseEntity<List<Meal>> getMeals() {
-        try {
-            List<Meal> mealsList = new ArrayList<>(mealRepo.findAll());
-            return new ResponseEntity<>(mealsList, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
-        }
+    public List<MealDto> getMeals() {
+        final var mealsListDto = new ArrayList<MealDto>();
+        mealReposiotry.findAll().forEach(meal -> mealsListDto.add(map(meal)));
+        return mealsListDto;
     }
 
-    public ResponseEntity<List<Meal>> getMealsFromSpecificRestaurant(UUID restaurantId) {
-        try {
-            List<Meal> mealList = new ArrayList<>();
-            mealRepo.findAll().stream()
-                    .filter(meal -> meal.getRestaurant().getId().equals(restaurantId))
-                    .forEach(mealList::add);
-            return new ResponseEntity<>(mealList, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
-        }
+    public List<MealDto> getMealsFromRestaurant(UUID restaurantId) {
+        final var result = mealReposiotry.findAll().stream()
+                .filter(meal -> meal.getRestaurant().getId().equals(restaurantId))
+                .map(Mapper::map)
+                .collect(Collectors.toList());
+        return result;
     }
 
-    public ResponseEntity<Restaurant> addRestaurant(CreateRestaurantDto createRestaurantDto) {
-        try {
-            Restaurant restaurant = restaurantRepo
-                    .save(new Restaurant(createRestaurantDto.getName(), createRestaurantDto.getAddress(), createRestaurantDto.getType()));
-            return new ResponseEntity<>(restaurant, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public RestaurantDto addRestaurant(CreateRestaurantDto createRestaurantDto) {
+        final var restaurant = restaurantRepository
+                .save(map(createRestaurantDto));
+        return map(restaurant);
+
     }
 
-    public ResponseEntity<Meal> addMeal(UUID restaurantId, CreateMealDto createMealDto) {
-        Restaurant restaurant = findRestaurant(restaurantId);
-        Meal meal = map(createMealDto);
+    public MealDto addMeal(UUID restaurantId, CreateMealDto createMealDto) {
+        final var meal = map(createMealDto);
+        final var restaurant = findRestaurant(restaurantId);
         meal.setRestaurant(restaurant);
-        restaurant.addMeal(meal);
-        return new ResponseEntity<>(mealRepo.save(meal), HttpStatus.OK);
+        restaurant.getMealsList().add(meal);
+        mealReposiotry.save(meal);
+        return map(meal);
     }
 
-    public ResponseEntity<Restaurant> updateRestaurant(UUID restaurantId, UpdateRestaurantRequest updateRestaurantRequest) {
-        Restaurant restaurant = findRestaurant(restaurantId);
+    public RestaurantDto updateRestaurant(UUID restaurantId, UpdateRestaurantRequest updateRestaurantRequest) {
+        final var restaurant = findRestaurant(restaurantId);
         updateRestaurantRequest.getName().ifPresent(restaurant::setName);
         updateRestaurantRequest.getAddress().ifPresent(restaurant::setAddress);
         updateRestaurantRequest.getType().ifPresent(restaurant::setType);
-        return new ResponseEntity<>(restaurantRepo.save(restaurant), HttpStatus.OK);
+        restaurantRepository.save(restaurant);
+        return map(restaurant);
     }
 
-    public ResponseEntity<HttpStatus> deleteRestaurant(UUID restaurantId) {
-        try {
-            restaurantRepo.deleteById(restaurantId);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
+    public void deleteRestaurant(UUID restaurantId) {
+        restaurantRepository.deleteById(restaurantId);
     }
 
-    public ResponseEntity<HttpStatus> deleteAllRestaurants() {
-        try {
-            restaurantRepo.deleteAll();
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public void deleteAllRestaurants() {
+        restaurantRepository.deleteAll();
     }
 
-
-
-    public ResponseEntity<HttpStatus> deleteMeal(UUID mealId) {
-        try {
-            mealRepo.deleteById(mealId);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public void deleteMeal(UUID mealId) {
+        final var meal = findMeal(mealId);
+        final var restaurant = meal.getRestaurant();
+        restaurant.getMealsList().remove(meal);
+        mealReposiotry.deleteById(mealId);
+        restaurantRepository.save(restaurant);
     }
 
-    public ResponseEntity<HttpStatus> deleteMealsFromSpecificRestaurant(UUID restaurantId) {
-        Restaurant restaurant = findRestaurant(restaurantId);
-        try {
-            mealRepo.findAll().stream()
-                    .filter(m -> m.getRestaurant().equals(restaurant))
-                    .forEach(mealRepo::delete);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-    }
-    public ResponseEntity<HttpStatus> deleteMeals() {
-        try {
-            mealRepo.deleteAll();
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public void deleteMealsFromRestaurant(UUID restaurantId) {
+        final var restaurant = findRestaurant(restaurantId);
+        restaurant.getMealsList().clear();
+        mealReposiotry.findAll().stream()
+                .filter(meal -> meal.getRestaurant().equals(restaurant))
+                .forEach(mealReposiotry::delete);
+        restaurantRepository.save(restaurant);
     }
 
-    private Restaurant findRestaurant(UUID restaurantId) {
-        return restaurantRepo.findById(restaurantId)
+    public void deleteMeals() {
+        final var restaurants = new ArrayList<>(restaurantRepository.findAll());
+        mealReposiotry.deleteAll();
+        restaurants
+                .forEach(restaurant -> {
+                    restaurant.getMealsList().clear();
+                    restaurantRepository.save(restaurant);
+                });
+    }
+
+    public Restaurant findRestaurant(UUID restaurantId) {
+        return restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new NotFoundResturantException("Restaurant not found"));
     }
+
+    private Meal findMeal(UUID mealId) {
+        return mealReposiotry.findById(mealId)
+                .orElseThrow(() -> new NotFoundMealException("Meal not found"));
+    }
+
 }

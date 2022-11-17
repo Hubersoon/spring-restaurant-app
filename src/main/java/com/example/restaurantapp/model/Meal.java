@@ -1,19 +1,21 @@
 package com.example.restaurantapp.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.UUID;
 
-@Data
+import static java.util.UUID.*;
+
+@Getter
+@Setter
+@EqualsAndHashCode
 @Entity
 @Table(name = "meals")
 @NoArgsConstructor(force = true)
 @AllArgsConstructor
-@RequiredArgsConstructor
+
 public class Meal {
 
     @Id
@@ -21,16 +23,31 @@ public class Meal {
     public final UUID id;
     public final String name;
     public final Double price;
-    @ManyToOne(cascade=CascadeType.ALL)
+    @JsonIgnore
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", referencedColumnName = "id")
     private Restaurant restaurant;
 
     public Meal(String name, Double price) {
         this.name = name;
         this.price = price;
-        this.id = UUID.randomUUID();
+        this.id = randomUUID();
     }
 
+    public Meal(String name, Double price, Restaurant restaurant) {
+        this.name = name;
+        this.price = price;
+        this.restaurant = restaurant;
+        this.id = randomUUID();
+    }
 
-
+    @Override
+    public String toString() {
+        return "Meal{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                '}';
+    }
 }
+

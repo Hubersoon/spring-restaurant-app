@@ -12,6 +12,7 @@ import java.util.UUID;
 @Builder
 public class MealDto {
 
+    public final String restaurantName;
     public final UUID id;
     public final String name;
     public final Double price;

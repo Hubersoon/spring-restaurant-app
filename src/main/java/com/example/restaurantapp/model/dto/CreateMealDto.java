@@ -3,11 +3,17 @@ package com.example.restaurantapp.model.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Builder
 public class CreateMealDto {
-    public final String name;
-    public final Double price;
+
+    private String name;
+    private Double price;
+
 }
